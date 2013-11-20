@@ -13,6 +13,8 @@
 	define("ERROR_MSG_DATABASE_ERROR", "Database error");
 	define("ERROR_CODE_UNAUTHORIZED_ACCESS", -1237);
 	define("ERROR_MSG_UNAUTHORIZED_ACCESS", "Unauthorized access");
+	define("ERROR_CODE_DUPLICATE", -1238);
+	define("ERROR_MSG_DUPLICATE", "Already exists");
 
 
 
@@ -96,9 +98,7 @@
 	* {"token":"abc123", "room_id":2}
 	*/
 	$app->post("/add_my_room", function() use ($app){
-		// -- OPRAVIT
-		// TU MI TO ISTE BUDE HADZAT AJ VIAC KRAT LEBO TO NEMUSI BYT UNIQUE
-	    $array = json_decode(file_get_contents('php://input'), true);
+		$array = json_decode(file_get_contents('php://input'), true);
         $token = $array["token"];
         $roomId = $array["room_id"];
 
@@ -111,16 +111,31 @@
 	    	echo error(ERROR_CODE_INVALID_TOKEN, ERROR_MSG_INVALID_TOKEN);
 	    	return;
 	    }
-	    
-	    $sql = "INSERT INTO redirecto_user_room (user_id, room_id) VALUES (:user_id, :room_id);";
 
-        $statement = $pdo->prepare($sql);
-        $statement->bindParam("user_id", $userId);
-        $statement->bindParam("room_id", $roomId);
-        $statement->execute();
+	    // Kontrola na duplikaty
+	    $sql1 = "SELECT id FROM redirecto_user_room WHERE user_id = :user_id AND room_id = :room_id;";
+
+        $statement1 = $pdo->prepare($sql1);
+        $statement1->bindParam("user_id", $userId);
+        $statement1->bindParam("room_id", $roomId);
+        $statement1->execute();
 
 		//
-        if($statement->rowCount() <= 0) {
+        if($statement1->rowCount() != 0) {
+        	echo error(ERROR_CODE_DUPLICATE, ERROR_MSG_DUPLICATE);
+        	return;
+        }
+	    
+	    // Vlozit novu miestnost medzi svoje
+	    $sql2 = "INSERT INTO redirecto_user_room (user_id, room_id) VALUES (:user_id, :room_id);";
+
+        $statement2 = $pdo->prepare($sql2);
+        $statement2->bindParam("user_id", $userId);
+        $statement2->bindParam("room_id", $roomId);
+        $statement2->execute();
+
+		//
+        if($statement2->rowCount() <= 0) {
         	echo error(ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR);
         } else {
         	echo success(true);
