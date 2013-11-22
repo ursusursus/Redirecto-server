@@ -27,13 +27,23 @@ $app->post ( "/get_all_rooms", function () use($app) {
 	$pdo = getDatabase ();
 	
 	$userId = isTokenValid ( $pdo, $token );
-	if ($userId == - 1) {
+	if ($userId == -1) {
 		echo error ( ERROR_CODE_INVALID_TOKEN, ERROR_MSG_INVALID_TOKEN );
 		return;
 	}
 	
-	$sql = "SELECT id, name, floor, created_at, changed_at FROM redirecto_room ORDER BY name;";
+	// $sql = "SELECT id, name, floor, created_at, changed_at FROM redirecto_room ORDER BY name;";
+	$sql = "SELECT id, name, floor, created_at, changed_at
+			FROM redirecto_room
+			WHERE id NOT IN (
+				SELECT redirecto_room.id
+				FROM redirecto_user 
+				JOIN redirecto_user_room ON redirecto_user.id = redirecto_user_room.user_id
+				JOIN redirecto_room ON redirecto_room.id = redirecto_user_room.room_id
+				WHERE redirecto_user.id = :user_id)";
+
 	$statement = $pdo->prepare ( $sql );
+	$statement->bindParam ( "user_id", $userId );
 	$statement->execute ();
 	
 	$rooms = $statement->fetchAll ( PDO::FETCH_OBJ );
@@ -185,7 +195,7 @@ $app->post ( "/remove_my_room", function () use($app) {
 	}
 } );
 
-/*
+/**
  * ADD ROOM {"token":"abc123", "name":"A117", "floor":"5. poschodie"} -- ADMIN ONLY
  */
 $app->post ( "/add_room", function () use($app) {
@@ -227,7 +237,7 @@ $app->post ( "/add_room", function () use($app) {
 	}
 } );
 
-/*
+/**
  * REMOVE ROOM {"token":"abc123", "room_id":1} -- ADMIN ONLY
  */
 $app->post ( "/remove_room", function () use($app) {
@@ -269,12 +279,20 @@ $app->post ( "/remove_room", function () use($app) {
 	}
 } );
 
+/**
+* LOCALIZE ME
+*
+*/
 $app->post ( "/localize_me", function () use($app) {
 	// automaticky vypocita room
 	// podla prijatych signalov
 	echo "localize me";
 } );
 
+/**
+* LOCALIZE ME MANUALLY
+*
+*/
 $app->post ( "/localize_me_manually", function () use($app) {
 	// rucne nastavi room
 	echo "localize me manually";
