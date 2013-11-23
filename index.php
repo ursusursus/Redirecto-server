@@ -89,11 +89,11 @@ $app->post ( "/get_my_rooms", function () use($app) {
 	$rooms = $statement->fetchAll ( PDO::FETCH_OBJ );
 	
 	//
-	if ($statement->rowCount () <= 0) {
-		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
-	} else {
+	//if ($statement->rowCount () <= 0) {
+	//	echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
+	// } else {
 		echo success ( $rooms );
-	}
+	// }
 } );
 
 /**
