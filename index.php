@@ -74,9 +74,6 @@ $app->post ( "/get_my_rooms", function () use($app) {
 		return;
 	}
 	
-	// select redirecto_room.id, redirecto_room.name, redirecto_room.floor, redirecto_room.created_at, redirecto_room.changed_at
-	// FROM redirecto_user INNER JOIN redirecto_user_room ON redirecto_user.id = redirecto_user_room.user_id INNER JOIN redirecto_room ON redirecto_room.id = redirecto_user_room.room_id
-	// WHERE redirecto_user.id=1;
 	$sql = "SELECT redirecto_room.id, redirecto_room.name, redirecto_room.floor, redirecto_room.created_at, redirecto_room.changed_at
 				FROM redirecto_user INNER JOIN redirecto_user_room ON redirecto_user.id = redirecto_user_room.user_id INNER JOIN redirecto_room ON redirecto_room.id = redirecto_user_room.room_id
 				WHERE redirecto_user.id=:user_id
@@ -286,6 +283,12 @@ $app->post ( "/remove_room", function () use($app) {
 $app->post ( "/localize_me", function () use($app) {
 	// automaticky vypocita room
 	// podla prijatych signalov
+	// select id, min(sqrt(
+	//				power(abs(10 - ap1),2)
+	//				 + power(abs(10 - ap2),2)
+	//				 + power(abs(10 - ap3),2)
+	//				 + power(abs(10 - ap4),2))) as coeficient
+	// from redirecto_fingerprint
 	echo "localize me";
 } );
 
