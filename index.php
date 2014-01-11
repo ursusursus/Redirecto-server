@@ -4,6 +4,7 @@ require 'Slim/Slim.php';
 \Slim\Slim::registerAutoloader ();
 $app = new \Slim\Slim ();
 
+define ( "MAX_RSSI", -110 );
 define ( "ERROR_CODE_BAD_LOGIN_OR_PASSWORD", - 1234 );
 define ( "ERROR_MSG_BAD_LOGIN_OR_PASSWORD", "Bad username or password" );
 define ( "ERROR_CODE_INVALID_TOKEN", - 1235 );
@@ -15,10 +16,12 @@ define ( "ERROR_MSG_UNAUTHORIZED_ACCESS", "Unauthorized access" );
 define ( "ERROR_CODE_DUPLICATE", - 1238 );
 define ( "ERROR_MSG_DUPLICATE", "Already exists" );
 
-$ACCEPTED_APs = array("anton", "bashawell", "dlink", 
+// !!! Keep synced with database columns
+$ACCEPTED_SSIDs = array("anton", "bashawell", "dlink", 
 		"fonseka", "gbvideo", "herkel", 
 		"megs", "mike_sk", "nikolka", 
 		"tomiwifi", "upc179993");
+// !!!
 
 /**
  * GET ALL ROOMS
@@ -325,7 +328,7 @@ $app->post ( "/new_fingerprints", function () use($app) {
 		// Assemble column names
 		for($i = 0; $i < count($fingerprint); $i++) {
 			$ap = $fingerprint[$i];
-			if(isApAccepted($ap["ssid"])) {
+			if(isSsidAccepted($ap["ssid"])) {
 				$sql = $sql . "ap_" . $ap["ssid"] . ","; 
 			}
 		}
@@ -335,7 +338,7 @@ $app->post ( "/new_fingerprints", function () use($app) {
 		// Assemble column values
 		for($i = 0; $i < count($fingerprint); $i++) {
 			$ap = $fingerprint[$i];
-			if(isApAccepted($ap["ssid"])) {
+			if(isSsidAccepted($ap["ssid"])) {
 				$sql = $sql . $ap["rssi"] . ","; 
 			}
 		}
@@ -360,18 +363,70 @@ $app->post ( "/new_fingerprints", function () use($app) {
 
 /**
 * LOCALIZE
-*
+* {
+*	"token":"6b0fd8c00640b1bac3b9ff110b4390fc409755cd", 
+*	"current_room_id":25, 
+*	"fingerprint":[
+* 		{"ssid":"gbvideo", "rssi":40},
+*		{"ssid":"bashawell", "rssi":30}
+* 	]
+* }
 */
 $app->post ( "/localize", function () use($app) {
-	// automaticky vypocita room
-	// podla prijatych signalov
-	// select id, min(sqrt(
-	//				power(abs(10 - ap1),2)
-	//				 + power(abs(10 - ap2),2)
-	//				 + power(abs(10 - ap3),2)
-	//				 + power(abs(10 - ap4),2))) as coeficient
-	// from redirecto_fingerprint
-	echo "localize";
+	$array = json_decode ( file_get_contents ( 'php://input' ), true );
+	$token = $array ["token"];
+	$roomId = $array ["current_room_id"];
+	$fingerprint = $array ["fingerprint"];
+
+	//
+	$pdo = getDatabase ();
+	
+	// Get user id from token
+	$userId = isTokenValid ( $pdo, $token );
+	if ($userId == - 1) {
+		echo error ( ERROR_CODE_INVALID_TOKEN, ERROR_MSG_INVALID_TOKEN );
+		return;
+	}
+
+	// Prefill array with defaults
+	$apValuesArray = array();
+	global $ACCEPTED_SSIDs;
+	foreach ($ACCEPTED_SSIDs as $ssid) {
+		$apValuesArray[$ssid] = MAX_RSSI;
+	}
+
+	// Override accepted SSIDs with measured values
+	foreach($fingerprint as $ap) {
+		if(isSsidAccepted($ap["ssid"])) {
+			$apValuesArray[$ap["ssid"]] = $ap["rssi"];
+		}
+	}
+
+	// Assemble select clause
+	$sql = "SELECT id, room_id, min(sqrt(";
+
+	$index = 0;
+	foreach ($apValuesArray as $ssid => $rssi) {
+		$sql = $sql . "power(abs({$rssi}-ap_{$ssid}),2)";
+		if($index++ < count($apValuesArray) - 1) {
+			$sql = $sql . "+\n";
+		}
+	}
+
+	$sql = $sql . ")) as coeficient FROM redirecto_fingerprint;";
+
+	// Execute query
+	$statement = $pdo->prepare ( $sql );
+	$statement->execute ();	
+	$rows = $statement->fetchAll ( \PDO::FETCH_OBJ );
+	
+	$rowCount = $statement->rowCount ();
+	if ($rowCount <= 0) {
+		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
+	} else {
+		echo $rows[0]->room_id;
+	}
+
 } );
 
 /**
@@ -610,10 +665,10 @@ function isTokenValid($pdo, $token) {
 	}
 }
 
-function isApAccepted($filteredAp) {
-	global $ACCEPTED_APs;
-	foreach ($ACCEPTED_APs as $ap) {
-		if($ap == $filteredAp) {
+function isSsidAccepted($filteredSsid) {
+	global $ACCEPTED_SSIDs;
+	foreach ($ACCEPTED_SSIDs as $ssid) {
+		if($ssid == $filteredSsid) {
 			return true;
 		}
 	}
