@@ -286,13 +286,17 @@ $app->post ( "/remove_room", function () use($app) {
 
 /**
 * NEW FINGERPRINTS
-* {"token":"abc123", 
-* "room_id":1, 
-* "fingerprints":[
-*	[{"ssid":"anton", "rssi":40}, {"ssid":"bashawell", "rssi":30}], 
-*	[{"ssid":"anton", "rssi":41}, {"ssid":"bashawell", "rssi":31}],
-*	[{"ssid":"anton", "rssi":42}, {"ssid":"bashawell", "rssi":32}]
-* ]}
+* {
+*	"token":"abc123", 
+*	"room_id":1, 
+*	"fingerprints":[
+*		[{"ssid":"anton", "rssi":40}, {"ssid":"bashawell", "rssi":30}], 
+*		[{"ssid":"anton", "rssi":41}, {"ssid":"bashawell", "rssi":31}],
+*		[{"ssid":"anton", "rssi":42}, {"ssid":"bashawell", "rssi":32}]
+*	]
+* }
+*
+* -- ADMIN ONLY
 */
 $app->post ( "/new_fingerprints", function () use($app) {
 	$array = json_decode ( file_get_contents ( 'php://input' ), true );
@@ -365,9 +369,9 @@ $app->post ( "/new_fingerprints", function () use($app) {
 * LOCALIZE
 * {
 *	"token":"6b0fd8c00640b1bac3b9ff110b4390fc409755cd", 
-*	"current_room_id":25, 
+*	"last_room_id":25, 
 *	"fingerprint":[
-* 		{"ssid":"gbvideo", "rssi":40},
+*		{"ssid":"gbvideo", "rssi":40},
 *		{"ssid":"bashawell", "rssi":30}
 * 	]
 * }
@@ -375,7 +379,7 @@ $app->post ( "/new_fingerprints", function () use($app) {
 $app->post ( "/localize", function () use($app) {
 	$array = json_decode ( file_get_contents ( 'php://input' ), true );
 	$token = $array ["token"];
-	$roomId = $array ["current_room_id"];
+	$lastRoomId = $array ["last_room_id"];
 	$fingerprint = $array ["fingerprint"];
 
 	//
@@ -423,9 +427,21 @@ $app->post ( "/localize", function () use($app) {
 	$rowCount = $statement->rowCount ();
 	if ($rowCount <= 0) {
 		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
-	} else {
-		echo $rows[0]->room_id;
+		return;
+	} 
+	
+	// Figure out wether to redirect is needed
+	$calculatedRoomId = $rows[0]->room_id;
+	if($calculatedRoomId != $lastRoomId || $lastRoomId == -1) {
+		// Its a change!
+		redirectVoipCalls($calculatedRoomId);
 	}
+
+	echo success(
+		array(
+			"calculated_room_id" => $calculatedRoomId
+			)
+		);
 
 } );
 
@@ -606,6 +622,7 @@ $app->post ( "/get_all_users", function () use($app) {
 } );
 
 $app->run ();
+
 function getDatabase() {
 	$config = include ("config.php");
 	$hostname = $config ["hostname"];
@@ -673,6 +690,10 @@ function isSsidAccepted($filteredSsid) {
 		}
 	}
 	return false;
+}
+
+function redirectVoipCalls($roomId) {
+	//
 }
 
 ?>
