@@ -277,6 +277,59 @@ $app->post ( "/remove_room", function () use($app) {
 } );
 
 /**
+* NEW FINGERPRINTS
+* {"token":"abc123", 
+* "room_id":1, 
+* "fingerprints":[
+*	[{"ssid":"anton", "rssi":40}, {"ssid":"bashawell", "rssi":30}], 
+*	[{"ssid":"anton", "rssi":41}, {"ssid":"bashawell", "rssi":31}],
+*	[{"ssid":"anton", "rssi":42}, {"ssid":"bashawell", "rssi":32}]
+* ]}
+*/
+$app->post ( "/new_fingerprints", function () use($app) {
+	$array = json_decode ( file_get_contents ( 'php://input' ), true );
+	$token = $array ["token"];
+	$roomId = $array ["room_id"];
+	$fingerprints = $array ["fingerprints"];
+
+	$acceptedAPs = array("anton", "bashawell", "dlink", 
+		"fonseka", "gbvideo", "herkel", 
+		"megs", "mike_sk", "nikolka", 
+		"tomiwifi", "upc179993");
+
+	// Assemble insert statement
+	foreach($fingerprints as $fingerprint) {
+		// Example	
+		// INSERT INTO redirecto_fingerprint (ap_anton, ap_bashawell, room_id) 
+		// VALUES (50, 50, 25);
+		$sql = "INSERT INTO redirecto_fingerprint (";
+
+		// Assemble column names
+		for($i = 0; $i < count($fingerprint); $i++) {
+			$ap = $fingerprint[$i];
+			if(filterAp($ap["ssid"], $acceptedAPs)) {
+				$sql = $sql . $ap["ssid"] . ","; 
+			}
+		}
+
+		$sql = $sql . "room_id) VALUES (";
+
+		// Assemble column values
+		for($i = 0; $i < count($fingerprint); $i++) {
+			$ap = $fingerprint[$i];
+			if(filterAp($ap["ssid"], $acceptedAPs)) {
+				$sql = $sql . $ap["rssi"] . ","; 
+			}
+		}
+
+		$sql = $sql . "$roomId);";
+		echo "SQL:" . $sql . "\n";
+	}
+
+
+} );
+
+/**
 * LOCALIZE
 *
 */
@@ -526,6 +579,15 @@ function isTokenValid($pdo, $token) {
 	} else {
 		return $rows [0]->id;
 	}
+}
+
+function filterAp($filteredAp, $aps) {
+	foreach ($aps as $ap) {
+		if($ap == $filteredAp) {
+			return true;
+		}
+	}
+	return false;
 }
 
 ?>
