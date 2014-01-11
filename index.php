@@ -15,6 +15,11 @@ define ( "ERROR_MSG_UNAUTHORIZED_ACCESS", "Unauthorized access" );
 define ( "ERROR_CODE_DUPLICATE", - 1238 );
 define ( "ERROR_MSG_DUPLICATE", "Already exists" );
 
+$ACCEPTED_APs = array("anton", "bashawell", "dlink", 
+		"fonseka", "gbvideo", "herkel", 
+		"megs", "mike_sk", "nikolka", 
+		"tomiwifi", "upc179993");
+
 /**
  * GET ALL ROOMS
  * {"token":"abc123"}
@@ -292,12 +297,25 @@ $app->post ( "/new_fingerprints", function () use($app) {
 	$roomId = $array ["room_id"];
 	$fingerprints = $array ["fingerprints"];
 
-	$acceptedAPs = array("anton", "bashawell", "dlink", 
-		"fonseka", "gbvideo", "herkel", 
-		"megs", "mike_sk", "nikolka", 
-		"tomiwifi", "upc179993");
+	//
+	$pdo = getDatabase ();
+	
+	// Get user id from token
+	$userId = isTokenValid ( $pdo, $token );
+	if ($userId == - 1) {
+		echo error ( ERROR_CODE_INVALID_TOKEN, ERROR_MSG_INVALID_TOKEN );
+		return;
+	}
+	
+	// Is admin?
+	if (! isAdmin ( $pdo, $userId )) {
+		echo error ( ERROR_CODE_UNAUTHORIZED_ACCESS, ERROR_MSG_UNAUTHORIZED_ACCESS );
+		return;
+	}
 
-	// Assemble insert statement
+	$errorCount = 0;
+
+	// Assemble insert statements
 	foreach($fingerprints as $fingerprint) {
 		// Example	
 		// INSERT INTO redirecto_fingerprint (ap_anton, ap_bashawell, room_id) 
@@ -307,8 +325,8 @@ $app->post ( "/new_fingerprints", function () use($app) {
 		// Assemble column names
 		for($i = 0; $i < count($fingerprint); $i++) {
 			$ap = $fingerprint[$i];
-			if(filterAp($ap["ssid"], $acceptedAPs)) {
-				$sql = $sql . $ap["ssid"] . ","; 
+			if(isApAccepted($ap["ssid"])) {
+				$sql = $sql . "ap_" . $ap["ssid"] . ","; 
 			}
 		}
 
@@ -317,15 +335,26 @@ $app->post ( "/new_fingerprints", function () use($app) {
 		// Assemble column values
 		for($i = 0; $i < count($fingerprint); $i++) {
 			$ap = $fingerprint[$i];
-			if(filterAp($ap["ssid"], $acceptedAPs)) {
+			if(isApAccepted($ap["ssid"])) {
 				$sql = $sql . $ap["rssi"] . ","; 
 			}
 		}
 
 		$sql = $sql . "$roomId);";
-		echo "SQL:" . $sql . "\n";
+
+		// Execute query
+		$statement = $pdo->prepare ( $sql );
+		$statement->execute ();
+		if ($statement->rowCount () <= 0) {
+			$errorCount++;
+		}
 	}
 
+	if($errorCount > 0) {
+		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
+	} else {
+		echo success ( true );
+	}
 
 } );
 
@@ -581,8 +610,9 @@ function isTokenValid($pdo, $token) {
 	}
 }
 
-function filterAp($filteredAp, $aps) {
-	foreach ($aps as $ap) {
+function isApAccepted($filteredAp) {
+	global $ACCEPTED_APs;
+	foreach ($ACCEPTED_APs as $ap) {
 		if($ap == $filteredAp) {
 			return true;
 		}
