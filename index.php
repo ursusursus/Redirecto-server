@@ -277,10 +277,10 @@ $app->post ( "/remove_room", function () use($app) {
 } );
 
 /**
-* LOCALIZE ME
+* LOCALIZE
 *
 */
-$app->post ( "/localize_me", function () use($app) {
+$app->post ( "/localize", function () use($app) {
 	// automaticky vypocita room
 	// podla prijatych signalov
 	// select id, min(sqrt(
@@ -289,16 +289,16 @@ $app->post ( "/localize_me", function () use($app) {
 	//				 + power(abs(10 - ap3),2)
 	//				 + power(abs(10 - ap4),2))) as coeficient
 	// from redirecto_fingerprint
-	echo "localize me";
+	echo "localize";
 } );
 
 /**
-* LOCALIZE ME MANUALLY
+* FORCE LOCALIZE
 *
 */
-$app->post ( "/localize_me_manually", function () use($app) {
+$app->post ( "/force_localize", function () use($app) {
 	// rucne nastavi room
-	echo "localize me manually";
+	echo "force_localize";
 } );
 
 /**
