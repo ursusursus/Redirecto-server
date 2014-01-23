@@ -1,7 +1,7 @@
 <?php 
 require_once "index.php";
 
-function addMyRooms() {
+function addMyRoom() {
 	$array = json_decode ( file_get_contents ( 'php://input' ), true );
 	$token = $array ["token"];
 	$roomId = $array ["room_id"];

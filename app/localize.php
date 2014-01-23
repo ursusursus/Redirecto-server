@@ -57,15 +57,17 @@ function localize() {
 
 	// Figure out wether to redirect is needed
 	$calculatedRoomId = $rows[0]->room_id;
-	if($calculatedRoomId != $lastRoomId || $lastRoomId == -1) {
+	if($calculatedRoomId != $lastRoomId) {
 		// Its a change!
 		redirectVoipCalls($calculatedRoomId);
+		echo success(
+			array(
+				"calculated_room_id" => $calculatedRoomId
+				)
+			);
+	} else {
+		echo error ( ERROR_CODE_ROOM_NOT_CHANGED_ERROR, ERROR_MSG_ROOM_NOT_CHANGED_ERROR );
 	}
 
-	echo success(
-		array(
-			"calculated_room_id" => $calculatedRoomId
-			)
-		);
 }
  ?>

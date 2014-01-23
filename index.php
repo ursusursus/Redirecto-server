@@ -17,6 +17,10 @@ require "app/admin/new_fingerprints.php";
 \Slim\Slim::registerAutoloader ();
 $app = new \Slim\Slim ();
 
+
+
+
+
 /******************************
 ********** CONSTANTS **********
 *******************************/
@@ -31,6 +35,8 @@ define ( "ERROR_CODE_UNAUTHORIZED_ACCESS", - 1237 );
 define ( "ERROR_MSG_UNAUTHORIZED_ACCESS", "Unauthorized access" );
 define ( "ERROR_CODE_DUPLICATE", - 1238 );
 define ( "ERROR_MSG_DUPLICATE", "Already exists" );
+define ( "ERROR_CODE_ROOM_NOT_CHANGED_ERROR", -1239 );
+define ( "ERROR_MSG_ROOM_NOT_CHANGED_ERROR", "Room not changed" );
 
 // !!! Keep synced with database columns at all times !!!
 $ACCEPTED_SSIDs = array("anton", "bashawell", "dlink", 
@@ -111,7 +117,7 @@ $app->post ( "/localize", function () use($app) {
 
 /**
 * FORCE LOCALIZE
-*
+* {"token":"abc123", "room_id":2}
 */
 $app->post ( "/force_localize", function () use($app) {
 	forceLocalize();
