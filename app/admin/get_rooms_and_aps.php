@@ -1,12 +1,10 @@
-<?php
+<?php 
 require_once "index.php";
 
-function addRoom() {
+function getRoomsAndAPs() {
 	$array = json_decode ( file_get_contents ( 'php://input' ), true );
 	$token = $array ["token"];
-	$name = $array ["name"];
-	$floor = $array ["floor"];
-	
+
 	$pdo = getDatabase ();
 	
 	// Get user id from token
@@ -21,23 +19,24 @@ function addRoom() {
 		echo error ( ERROR_CODE_UNAUTHORIZED_ACCESS, ERROR_MSG_UNAUTHORIZED_ACCESS );
 		return;
 	}
-	
-	//
-	$sql = "INSERT INTO redirecto_room (name, floor) VALUES (:name, :floor);";
-	
-	//
+
+	$sql = "SELECT id, name, floor, created_at, changed_at FROM redirecto_room ORDER BY name;";
+
 	$statement = $pdo->prepare ( $sql );
-	$statement->bindParam ( "name", $name );
-	$statement->bindParam ( "floor", $floor );
-	
-	//
 	$statement->execute ();
+	
+	$rooms = $statement->fetchAll ( PDO::FETCH_OBJ );
 	
 	//
 	if ($statement->rowCount () <= 0) {
 		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
 	} else {
-		echo success ( true );
+		global $ACCEPTED_SSIDs;
+		echo success ( array(
+			"rooms" => $rooms,
+			"aps" => $ACCEPTED_SSIDs
+			) 
+		);
 	}
 }
  ?>

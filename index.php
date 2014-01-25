@@ -13,6 +13,7 @@ require "app/admin/add_user.php";
 require "app/admin/add_room.php";
 require "app/admin/remove_room.php";
 require "app/admin/new_fingerprints.php";
+require "app/admin/get_rooms_and_aps.php";
 
 \Slim\Slim::registerAutoloader ();
 $app = new \Slim\Slim ();
@@ -38,12 +39,14 @@ define ( "ERROR_MSG_DUPLICATE", "Already exists" );
 define ( "ERROR_CODE_ROOM_NOT_CHANGED_ERROR", -1239 );
 define ( "ERROR_MSG_ROOM_NOT_CHANGED_ERROR", "Room not changed" );
 
-// !!! Keep synced with database columns at all times !!!
+// !!! KEEP SYNCED WITH DATABASE COLUMN NAMES AT ALL TIMES !!!
+// IF THIS CHANGES (or a typo was made) YOU NEED TO RECREATE THE
+// WHOLE DATABASE, AS IT NEEDS TO BE DROPPED
 $ACCEPTED_SSIDs = array("anton", "bashawell", "dlink", 
 		"fonseka", "gbvideo", "herkel", 
-		"megs", "mike_sk", "nikolka", 
-		"tomiwifi", "upc179993");
-
+		"megs", "mike_sk", "nikolka", "s11",
+		"tomiwifi", "upc1799993");
+// !!!
 
 
 
@@ -181,6 +184,16 @@ $app->post ( "/new_fingerprints", function () use($app) {
 	newFingerprints();
 });
 
+/**
+ * GET ROOMS AND APS 
+ * {"token":"abc123", "room_id":1} 
+ *
+ * -- ADMIN ONLY
+ */
+$app->post ( "/get_rooms_and_aps", function () use($app) {
+	getRoomsAndAPs();
+});
+
 $app->run ();
 
 
@@ -253,7 +266,8 @@ function isTokenValid($pdo, $token) {
 function isSsidAccepted($filteredSsid) {
 	global $ACCEPTED_SSIDs;
 	foreach ($ACCEPTED_SSIDs as $ssid) {
-		if($ssid == $filteredSsid) {
+		// if($ssid == $filteredSsid) {
+		if (strcasecmp($ssid, $filteredSsid) == 0) {
 			return true;
 		}
 	}
@@ -261,7 +275,7 @@ function isSsidAccepted($filteredSsid) {
 }
 
 function redirectVoipCalls($roomId) {
-	//
+	// TODO
 }
 
 ?>

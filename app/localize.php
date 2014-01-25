@@ -27,7 +27,7 @@ function localize() {
 	// Override accepted SSIDs with measured values
 	foreach($fingerprint as $ap) {
 		if(isSsidAccepted($ap["ssid"])) {
-			$apValuesArray[$ap["ssid"]] = $ap["rssi"];
+			$apValuesArray[strtolower($ap["ssid"])] = $ap["rssi"];
 		}
 	}
 
@@ -57,7 +57,18 @@ function localize() {
 
 	// Figure out wether to redirect is needed
 	$calculatedRoomId = $rows[0]->room_id;
-	if($calculatedRoomId != $lastRoomId) {
+
+	// LOGINSERT INTO redirecto_log (column_id, coeficient, calculated_room_id, sql) VALUES (:column_id, :coeficient, :calculated_room_id, :sql);
+	$sqlLog = "";
+	$statement2 = $pdo->prepare ( $sqlLog );
+	$statement2->bindParam ( "column_id", $rows[0]->id );
+	$statement2->bindParam ( "coeficient", $rows[0]->coeficient );
+	$statement2->bindParam ( "calculated_room_id", $rows[0]->room_id );
+	$statement2->bindParam ( "sql", $sql );
+	$statement2->execute ();	
+	// END LOG
+
+	// if($calculatedRoomId != $lastRoomId) {
 		// Its a change!
 		redirectVoipCalls($calculatedRoomId);
 		echo success(
@@ -65,9 +76,9 @@ function localize() {
 				"calculated_room_id" => $calculatedRoomId
 				)
 			);
-	} else {
+	/* } else {
 		echo error ( ERROR_CODE_ROOM_NOT_CHANGED_ERROR, ERROR_MSG_ROOM_NOT_CHANGED_ERROR );
-	}
+	} */
 
 }
  ?>
