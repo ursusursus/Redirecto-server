@@ -32,7 +32,7 @@ function localize() {
 	}
 
 	// Assemble select clause
-	$sql = "SELECT id, room_id, min(sqrt(";
+	$sql = "SELECT id, room_id, sqrt(";
 
 	$index = 0;
 	foreach ($apValuesArray as $ssid => $rssi) {
@@ -42,7 +42,7 @@ function localize() {
 		}
 	}
 
-	$sql = $sql . ")) as coeficient FROM redirecto_fingerprint;";
+	$sql = $sql . ") as coeficient FROM redirecto_fingerprint ORDER BY coeficient ASC LIMIT 1;";
 
 	// Execute query
 	$statement = $pdo->prepare ( $sql );
@@ -58,14 +58,14 @@ function localize() {
 	// Figure out wether to redirect is needed
 	$calculatedRoomId = $rows[0]->room_id;
 
-	// LOGINSERT INTO redirecto_log (column_id, coeficient, calculated_room_id, sql) VALUES (:column_id, :coeficient, :calculated_room_id, :sql);
-	$sqlLog = "";
+	// LOG
+	$sqlLog = "INSERT INTO redirecto_log (row_id, coeficient, calculated_room_id, query) VALUES (:row_id, :coeficient, :calculated_room_id, :query);";
 	$statement2 = $pdo->prepare ( $sqlLog );
-	$statement2->bindParam ( "column_id", $rows[0]->id );
+	$statement2->bindParam ( "row_id", $rows[0]->id );
 	$statement2->bindParam ( "coeficient", $rows[0]->coeficient );
 	$statement2->bindParam ( "calculated_room_id", $rows[0]->room_id );
-	$statement2->bindParam ( "sql", $sql );
-	$statement2->execute ();	
+	$statement2->bindParam ( "query", $sql );
+	$statement2->execute ();
 	// END LOG
 
 	// if($calculatedRoomId != $lastRoomId) {
