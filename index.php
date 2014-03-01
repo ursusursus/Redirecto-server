@@ -326,7 +326,6 @@ function redirectVoipCalls($userId, $roomId) {
 	// $dn="24"; //klapka 7077
 	// $phoneNumber="2553"; //kam presmerovat
 
-	// $sharedSecret = "VoIPr3d1r3ct0r";
 	$hashedString = SHARED_SECRET . ';timestamp=' . $timestamp .';dn=' . $directoryNumber . ';forward=' . $phoneNumber . ';' . SHARED_SECRET;
 	$hash = hash('sha512',$hashedString);
 
