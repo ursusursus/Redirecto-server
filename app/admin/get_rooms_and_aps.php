@@ -20,7 +20,7 @@ function getRoomsAndAPs() {
 		return;
 	}
 
-	$sql = "SELECT id, name, floor, created_at, changed_at FROM redirecto_room ORDER BY name;";
+	$sql = "SELECT id, name, floor, phone_number, created_at, changed_at FROM redirecto_room ORDER BY name;";
 
 	$statement = $pdo->prepare ( $sql );
 	$statement->execute ();

@@ -12,8 +12,7 @@ function getAllRooms() {
 		return;
 	}
 	
-	// $sql = "SELECT id, name, floor, created_at, changed_at FROM redirecto_room ORDER BY name;";
-	$sql = "SELECT id, name, floor, created_at, changed_at
+	$sql = "SELECT id, name, floor, phone_number, created_at, changed_at
 			FROM redirecto_room
 			WHERE id NOT IN (
 				SELECT redirecto_room.id

@@ -7,29 +7,50 @@ function login() {
 	$email = $array ["email"];
 	$password = $array ["password"];
 	
-	$token = sha1 ( uniqid () );
+	// $token = sha1 ( uniqid () );
 	$hashedPassword = sha1 ( $password );
 	
-	//
+	// SELECT id, email, directory_number FROM redirecto_user WHERE email = email AND password = password;
+	// if rowCount <= 0
+	// 	die()
+	// else
+	// 	generate token
+	// 	update token
+	//  echo token, email, directory_number
+
 	$pdo = getDatabase ();
-	$sql = "UPDATE redirecto_user SET token = :token WHERE email = :email AND password = :password;";
+	// $sql = "UPDATE redirecto_user SET token = :token WHERE email = :email AND password = :password;";
+	$sql = "SELECT id, email, directory_number FROM redirecto_user WHERE email = :email AND password = :password;";
 	
 	//
 	$statement = $pdo->prepare ( $sql );
-	$statement->bindParam ( "token", $token );
 	$statement->bindParam ( "email", $email );
 	$statement->bindParam ( "password", $hashedPassword );
-	
-	//
 	$statement->execute ();
+
+	//
+	$rows = $statement->fetchAll ( \PDO::FETCH_OBJ );
 	
 	//
-	if ($statement->rowCount () <= 0) {
+	if ($statement->rowCount () != 1) {
 		echo error ( ERROR_CODE_BAD_LOGIN_OR_PASSWORD, ERROR_MSG_BAD_LOGIN_OR_PASSWORD );
+
 	} else {
+		// Generate token
+		$token = sha1 ( uniqid () );
+
+		// Update token in database
+		$sql2 = "UPDATE redirecto_user SET token = :token WHERE id = :id;";
+		$statement2 = $pdo->prepare ( $sql2 );
+		$statement2->bindParam ( "token", $token );
+		$statement2->bindParam ( "id", $rows[0]->id );
+		$statement2->execute ();
+
+		// Echo response
 		$responseArray = array ();
 		$responseArray ["token"] = $token;
-		$responseArray ["email"] = $email;
+		$responseArray ["email"] = $rows[0]->email;
+		$responseArray ["directory_number"] = $rows[0]->directory_number;
 		echo success ( $responseArray );
 	}
 	

@@ -26,6 +26,9 @@ $app = new \Slim\Slim ();
 ********** CONSTANTS **********
 *******************************/
 define ( "MAX_RSSI", -110 );
+define ( "VOIP_REDIRECT_URL", "http://ns.cnl.sk/forward.php");
+define ( "SHARED_SECRET", "VoIPr3d1r3ct0r");
+
 define ( "ERROR_CODE_BAD_LOGIN_OR_PASSWORD", - 1234 );
 define ( "ERROR_MSG_BAD_LOGIN_OR_PASSWORD", "Bad username or password" );
 define ( "ERROR_CODE_INVALID_TOKEN", - 1235 );
@@ -38,6 +41,9 @@ define ( "ERROR_CODE_DUPLICATE", - 1238 );
 define ( "ERROR_MSG_DUPLICATE", "Already exists" );
 define ( "ERROR_CODE_ROOM_NOT_CHANGED_ERROR", -1239 );
 define ( "ERROR_MSG_ROOM_NOT_CHANGED_ERROR", "Room not changed" );
+define ( "ERROR_CODE_REDIRECT_FAILED", -1240) ;
+define ( "ERROR_MSG_REDIRECT_FAILED", "Redirect failed" );
+
 
 // !!! KEEP SYNCED WITH DATABASE COLUMN NAMES AT ALL TIMES !!!
 // IF THIS CHANGES (or a typo was made) YOU NEED TO RECREATE THE
@@ -54,6 +60,13 @@ $ACCEPTED_SSIDs = array("anton", "bashawell", "dlink",
 /******************************
 ************* API *************
 *******************************/
+
+/* $app->get ( "/test_redirect", function () use($app) {
+	$redirectSuccess = redirectVoipCalls(1, 28);
+	if(!$redirectSuccess) {
+		echo error ( ERROR_CODE_REDIRECT_FAILED, ERROR_MSG_REDIRECT_FAILED );
+	}
+}); */
 
 /**
  * LOGIN
@@ -148,7 +161,7 @@ $app->post ( "/add_user", function () use($app) {
 
 /**
  * ADD ROOM 
- * {"token":"abc123", "name":"A117", "floor":"5. poschodie"} 
+ * {"token":"abc123", "name":"A117", "floor":"5. poschodie", "phone_number":"1234"} 
  *
  * -- ADMIN ONLY
  */
@@ -274,8 +287,56 @@ function isSsidAccepted($filteredSsid) {
 	return false;
 }
 
-function redirectVoipCalls($roomId) {
-	// TODO
+function redirectVoipCalls($userId, $roomId) {
+	//
+	$pdo = getDatabase();
+
+	// Get user directory number
+	$sql1 = "SELECT directory_number FROM redirecto_user WHERE id = :id";
+
+	$statement1 = $pdo->prepare ( $sql1 );
+	$statement1->bindParam ( "id", $userId );
+	$statement1->execute ();
+	
+	$rows1 = $statement1->fetchAll ( \PDO::FETCH_OBJ );
+	if($statement1->rowCount () != 1) {
+		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
+		return;
+	}
+	$directoryNumber = $rows1 [0]->directory_number;
+	
+
+	// Get room phone number
+	$sql2 = "SELECT phone_number FROM redirecto_room WHERE id = :id";
+
+	$statement2 = $pdo->prepare ( $sql2 );
+	$statement2->bindParam ( "id", $roomId );
+	$statement2->execute ();
+	
+	$rows2 = $statement2->fetchAll ( \PDO::FETCH_OBJ );
+	if($statement2->rowCount () != 1) {
+		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
+		return;
+	}
+	$phoneNumber = $rows2 [0]->phone_number;
+
+
+	// Call script that actually redirects calls inside call manager
+	$timestamp=time();
+	// $dn="24"; //klapka 7077
+	// $phoneNumber="2553"; //kam presmerovat
+
+	// $sharedSecret = "VoIPr3d1r3ct0r";
+	$hashedString = SHARED_SECRET . ';timestamp=' . $timestamp .';dn=' . $directoryNumber . ';forward=' . $phoneNumber . ';' . SHARED_SECRET;
+	$hash = hash('sha512',$hashedString);
+
+	$url = VOIP_REDIRECT_URL . "?timestamp=$timestamp&dn=$directoryNumber&forward=$phoneNumber&hash=$hash";
+
+	$fp=fopen($url,"rb");
+	$response = stream_get_contents($fp);
+	fclose($fp);	
+
+	return $response == "OK";
 }
 
 ?>

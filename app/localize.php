@@ -70,12 +70,19 @@ function localize() {
 
 	// if($calculatedRoomId != $lastRoomId) {
 		// Its a change!
-		redirectVoipCalls($calculatedRoomId);
-		echo success(
-			array(
-				"calculated_room_id" => $calculatedRoomId
-				)
-			);
+
+		$redirectSuccess = redirectVoipCalls($userId, $calculatedRoomId);
+		if(!$redirectSuccess) {
+			echo error ( ERROR_CODE_REDIRECT_FAILED, ERROR_MSG_REDIRECT_FAILED );
+
+		} else {
+			echo success(
+				array(
+					"calculated_room_id" => $calculatedRoomId
+					)
+				);
+		}
+
 	/* } else {
 		echo error ( ERROR_CODE_ROOM_NOT_CHANGED_ERROR, ERROR_MSG_ROOM_NOT_CHANGED_ERROR );
 	} */

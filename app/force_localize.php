@@ -16,12 +16,17 @@ function forceLocalize() {
 		return;
 	}
 
-	//
-	redirectVoipCalls($desiredRoomId);
-	echo success(
-		array(
-			"calculated_room_id" => $desiredRoomId
-			)
-		);
+	$redirectSuccess = redirectVoipCalls($userId, $desiredRoomId);
+	if(!$redirectSuccess) {
+		echo error ( ERROR_CODE_REDIRECT_FAILED, ERROR_MSG_REDIRECT_FAILED );
+
+	} else {
+		echo success(
+			array(
+				"calculated_room_id" => $desiredRoomId
+				)
+			);
+	}
+
 }
  ?>

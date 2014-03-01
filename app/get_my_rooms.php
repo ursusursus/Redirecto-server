@@ -15,7 +15,7 @@ function getMyRooms() {
 		return;
 	}
 	
-	$sql = "SELECT redirecto_room.id, redirecto_room.name, redirecto_room.floor, redirecto_room.created_at, redirecto_room.changed_at
+	$sql = "SELECT redirecto_room.id, redirecto_room.name, redirecto_room.floor, redirecto_room.phone_number, redirecto_room.created_at, redirecto_room.changed_at
 				FROM redirecto_user INNER JOIN redirecto_user_room ON redirecto_user.id = redirecto_user_room.user_id INNER JOIN redirecto_room ON redirecto_room.id = redirecto_user_room.room_id
 				WHERE redirecto_user.id=:user_id
 				ORDER BY redirecto_room.name;";

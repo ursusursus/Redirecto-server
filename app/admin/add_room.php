@@ -6,6 +6,7 @@ function addRoom() {
 	$token = $array ["token"];
 	$name = $array ["name"];
 	$floor = $array ["floor"];
+	$phoneNumber = $array ["phone_number"];
 	
 	$pdo = getDatabase ();
 	
@@ -23,12 +24,13 @@ function addRoom() {
 	}
 	
 	//
-	$sql = "INSERT INTO redirecto_room (name, floor) VALUES (:name, :floor);";
+	$sql = "INSERT INTO redirecto_room (name, floor, phone_number) VALUES (:name, :floor, :phone_number);";
 	
 	//
 	$statement = $pdo->prepare ( $sql );
 	$statement->bindParam ( "name", $name );
 	$statement->bindParam ( "floor", $floor );
+	$statement->bindParam ( "phone_number", $phoneNumber );
 	
 	//
 	$statement->execute ();
