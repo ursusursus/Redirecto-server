@@ -48,10 +48,14 @@ define ( "ERROR_MSG_REDIRECT_FAILED", "Redirect failed" );
 // !!! KEEP SYNCED WITH DATABASE COLUMN NAMES AT ALL TIMES !!!
 // IF THIS CHANGES (or a typo was made) YOU NEED TO RECREATE THE
 // WHOLE DATABASE, AS IT NEEDS TO BE DROPPED
-$ACCEPTED_SSIDs = array("anton", "bashawell", "dlink", 
+/* $ACCEPTED_SSIDs = array("anton", "bashawell", "dlink", 
 		"fonseka", "gbvideo", "herkel", 
 		"megs", "mike_sk", "nikolka", "s11",
-		"tomiwifi", "upc1799993");
+		"tomiwifi", "upc1799993"); */
+$ACCEPTED_BSSIDs = array("00:4f:62:26:ed:f5", "00:16:b6:d9:06:66", "c4:27:95:77:eb:03", 
+		"34:08:04:d4:4a:ac", "00:1c:f0:89:0e:b0", "00:22:b0:a6:5f:40", 
+		"00:22:75:24:03:64", "00:24:01:93:49:56", "bc:f6:85:c9:95:44", "90:94:e4:3a:c4:02",
+		"00:26:5a:af:bf:de", "28:10:7b:ed:4b:14");
 // !!!
 
 
@@ -276,11 +280,11 @@ function isTokenValid($pdo, $token) {
 	}
 }
 
-function isSsidAccepted($filteredSsid) {
-	global $ACCEPTED_SSIDs;
-	foreach ($ACCEPTED_SSIDs as $ssid) {
+function isBssidAccepted($filteredBssid) {
+	global $ACCEPTED_BSSIDs;
+	foreach ($ACCEPTED_BSSIDs as $bssid) {
 		// if($ssid == $filteredSsid) {
-		if (strcasecmp($ssid, $filteredSsid) == 0) {
+		if (strcasecmp($bssid, $filteredBssid) == 0) {
 			return true;
 		}
 	}

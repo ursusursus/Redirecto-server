@@ -35,8 +35,8 @@ function newFingerprints() {
 		// Assemble column names
 		for($i = 0; $i < count($fingerprint); $i++) {
 			$ap = $fingerprint[$i];
-			if(isSsidAccepted($ap["ssid"])) {
-				$sql = $sql . "ap_" . $ap["ssid"] . ","; 
+			if(isBssidAccepted($ap["bssid"])) {
+				$sql = $sql . "`ap_" . $ap["bssid"] . "`,"; 
 			}
 		}
 
@@ -45,12 +45,13 @@ function newFingerprints() {
 		// Assemble column values
 		for($i = 0; $i < count($fingerprint); $i++) {
 			$ap = $fingerprint[$i];
-			if(isSsidAccepted($ap["ssid"])) {
+			if(isBssidAccepted($ap["bssid"])) {
 				$sql = $sql . $ap["rssi"] . ","; 
 			}
 		}
 
 		$sql = $sql . "$roomId);";
+
 
 		// Execute query
 		$statement = $pdo->prepare ( $sql );

@@ -19,15 +19,15 @@ function localize() {
 
 	// Prefill array with defaults
 	$apValuesArray = array();
-	global $ACCEPTED_SSIDs;
-	foreach ($ACCEPTED_SSIDs as $ssid) {
-		$apValuesArray[$ssid] = MAX_RSSI;
+	global $ACCEPTED_BSSIDs;
+	foreach ($ACCEPTED_BSSIDs as $bssid) {
+		$apValuesArray[$bssid] = MAX_RSSI;
 	}
 
 	// Override accepted SSIDs with measured values
 	foreach($fingerprint as $ap) {
-		if(isSsidAccepted($ap["ssid"])) {
-			$apValuesArray[strtolower($ap["ssid"])] = $ap["rssi"];
+		if(isBssidAccepted($ap["bssid"])) {
+			$apValuesArray[strtolower($ap["bssid"])] = $ap["rssi"];
 		}
 	}
 
@@ -35,8 +35,8 @@ function localize() {
 	$sql = "SELECT id, room_id, sqrt(";
 
 	$index = 0;
-	foreach ($apValuesArray as $ssid => $rssi) {
-		$sql = $sql . "power(abs({$rssi}-ap_{$ssid}),2)";
+	foreach ($apValuesArray as $bssid => $rssi) {
+		$sql = $sql . "power(abs({$rssi}-`ap_{$bssid}`),2)";
 		if($index++ < count($apValuesArray) - 1) {
 			$sql = $sql . "+\n";
 		}

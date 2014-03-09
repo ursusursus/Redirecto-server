@@ -31,10 +31,10 @@ function getRoomsAndAPs() {
 	if ($statement->rowCount () <= 0) {
 		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
 	} else {
-		global $ACCEPTED_SSIDs;
+		global $ACCEPTED_BSSIDs;
 		echo success ( array(
 			"rooms" => $rooms,
-			"aps" => $ACCEPTED_SSIDs
+			"aps" => $ACCEPTED_BSSIDs
 			) 
 		);
 	}
