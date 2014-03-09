@@ -45,17 +45,51 @@ define ( "ERROR_CODE_REDIRECT_FAILED", -1240) ;
 define ( "ERROR_MSG_REDIRECT_FAILED", "Redirect failed" );
 
 
-// !!! KEEP SYNCED WITH DATABASE COLUMN NAMES AT ALL TIMES !!!
-// IF THIS CHANGES (or a typo was made) YOU NEED TO RECREATE THE
-// WHOLE DATABASE, AS IT NEEDS TO BE DROPPED
 /* $ACCEPTED_SSIDs = array("anton", "bashawell", "dlink", 
 		"fonseka", "gbvideo", "herkel", 
 		"megs", "mike_sk", "nikolka", "s11",
 		"tomiwifi", "upc1799993"); */
-$ACCEPTED_BSSIDs = array("00:4f:62:26:ed:f5", "00:16:b6:d9:06:66", "c4:27:95:77:eb:03", 
+// Home
+/* $ACCEPTED_BSSIDs = array("00:4f:62:26:ed:f5", "00:16:b6:d9:06:66", "c4:27:95:77:eb:03", 
 		"34:08:04:d4:4a:ac", "00:1c:f0:89:0e:b0", "00:22:b0:a6:5f:40", 
 		"00:22:75:24:03:64", "00:24:01:93:49:56", "bc:f6:85:c9:95:44", "90:94:e4:3a:c4:02",
-		"00:26:5a:af:bf:de", "28:10:7b:ed:4b:14");
+		"00:26:5a:af:bf:de", "28:10:7b:ed:4b:14"); */
+
+// !!! KEEP SYNCED WITH DATABASE COLUMN NAMES AT ALL TIMES !!!
+// IF THIS CHANGES (or a typo was made) YOU NEED TO RECREATE THE
+// WHOLE DATABASE, AS IT NEEDS TO BE DROPPED
+$ACCEPTED_BSSIDs = array(
+	// TUNET
+	"00:26:cb:a0:93:f1",
+	"00:26:cb:4d:78:ae",
+	"00:26:cb:4d:78:a1",
+	"00:26:cb:4e:19:fe",
+	"00:26:cb:4e:19:f1",
+	"00:26:cb:a0:93:fe",
+	"00:26:cb:4e:18:d1",
+	"00:26:cb:a0:a1:b1",
+	"00:26:cb:a0:a1:be",
+	"58:bc:27:5c:ba:9e",
+	"00:26:cb:4e:19:11",
+	"00:26:cb:4e:19:1e",
+	"00:26:cb:4e:1b:01",
+	"58:bc:27:5c:ba:91",
+
+	// EDUROAM
+	"00:26:cb:4d:78:a2",
+	"00:26:cb:4d:78:ad",
+	"00:26:cb:4e:19:fd",
+	"00:26:cb:4e:19:f2",
+	"00:26:cb:a0:93:f2",
+	"00:26:cb:a0:93:fd",
+	"00:26:cb:4e:18:d2",
+	"00:26:cb:a0:a1:bd",
+	"00:26:cb:a0:a1:b2",
+	"00:26:cb:4e:19:12",
+	"00:26:cb:4e:19:1d",
+	"58:bc:27:5c:ba:9d",
+	"00:26:cb:9f:ac:92",
+	"58:bc:27:5c:ba:92");
 // !!!
 
 
