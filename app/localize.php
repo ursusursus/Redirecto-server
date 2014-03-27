@@ -55,9 +55,6 @@ function localize() {
 		return;
 	} 
 
-	// Figure out wether to redirect is needed
-	$calculatedRoomId = $rows[0]->room_id;
-
 	// LOG
 	$sqlLog = "INSERT INTO redirecto_log (row_id, coeficient, calculated_room_id, query) VALUES (:row_id, :coeficient, :calculated_room_id, :query);";
 	$statement2 = $pdo->prepare ( $sqlLog );
@@ -67,6 +64,25 @@ function localize() {
 	$statement2->bindParam ( "query", $sql );
 	$statement2->execute ();
 	// END LOG
+
+	// Get users defined accuracy coeficient setting
+	$sqlCoef = "SELECT acc_coef FROM redirecto_user WHERE id = :user_id";
+	$statement3 = $pdo->prepare( $sqlCoef );
+	$statement3->bindParam ( "user_id", $userId);
+	$statement3->execute ();
+	$coefs = $statement3->fetchAll ( \PDO::FETCH_OBJ );
+	// var_dump($coefs[0]);
+	
+	$calculatedRoomId = $rows[0]->room_id;
+	$calculatedCoeficient = $rows[0]->coeficient;
+	$userSavedCoeficient = $coefs[0]->acc_coef;
+
+
+	// Figure out whether to redirect is needed
+	if($calculatedCoeficient >= $userSavedCoeficient) {
+		echo error( ERROR_CODE_COEFICIENT_TOO_LARGE, ERROR_MSG_COEFICIENT_TOO_LARGE );
+		return;
+	}
 
 	// if($calculatedRoomId != $lastRoomId) {
 		// Its a change!

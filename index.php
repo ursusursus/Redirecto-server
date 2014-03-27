@@ -29,8 +29,8 @@ $app = new \Slim\Slim ();
 define ( MAX_RSSI, -110 );
 define ( VOIP_REDIRECT_URL, "http://ns.cnl.sk/forward.php");
 define ( SHARED_SECRET, "VoIPr3d1r3ct0r");
-define ( MINIMAL_ACC_COEFICIENT, 50);
-define ( DEFAULT_ACC_COEFICIENT, 70);
+define ( MINIMAL_ACC_COEFICIENT, 30);
+define ( DEFAULT_ACC_COEFICIENT, 50);
 
 define ( ERROR_CODE_BAD_LOGIN_OR_PASSWORD, - 1234 );
 define ( ERROR_MSG_BAD_LOGIN_OR_PASSWORD, "Bad username or password" );
@@ -46,6 +46,8 @@ define ( ERROR_CODE_ROOM_NOT_CHANGED_ERROR, -1239 );
 define ( ERROR_MSG_ROOM_NOT_CHANGED_ERROR, "Room not changed" );
 define ( ERROR_CODE_REDIRECT_FAILED, -1240) ;
 define ( ERROR_MSG_REDIRECT_FAILED, "Redirect failed" );
+define ( ERROR_CODE_COEFICIENT_TOO_LARGE, -1241 );
+define ( ERROR_MSG_COEFICIENT_TOO_LARGE, "Coeficient too large. Not forwarding" );
 
 
 // !!! KEEP SYNCED WITH DATABASE COLUMN NAMES AT ALL TIMES !!!
