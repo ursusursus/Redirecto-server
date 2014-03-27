@@ -8,6 +8,7 @@ require "app/get_all_rooms.php";
 require "app/get_my_rooms.php";
 require "app/add_my_room.php";
 require "app/remove_my_room.php";
+require "app/change_coef_settings.php";
 require "app/admin/get_all_users.php";
 require "app/admin/add_user.php";
 require "app/admin/add_room.php";
@@ -25,71 +26,56 @@ $app = new \Slim\Slim ();
 /******************************
 ********** CONSTANTS **********
 *******************************/
-define ( "MAX_RSSI", -110 );
-define ( "VOIP_REDIRECT_URL", "http://ns.cnl.sk/forward.php");
-define ( "SHARED_SECRET", "VoIPr3d1r3ct0r");
+define ( MAX_RSSI, -110 );
+define ( VOIP_REDIRECT_URL, "http://ns.cnl.sk/forward.php");
+define ( SHARED_SECRET, "VoIPr3d1r3ct0r");
+define ( MINIMAL_ACC_COEFICIENT, 50);
+define ( DEFAULT_ACC_COEFICIENT, 70);
 
-define ( "ERROR_CODE_BAD_LOGIN_OR_PASSWORD", - 1234 );
-define ( "ERROR_MSG_BAD_LOGIN_OR_PASSWORD", "Bad username or password" );
-define ( "ERROR_CODE_INVALID_TOKEN", - 1235 );
-define ( "ERROR_MSG_INVALID_TOKEN", "Invalid token" );
-define ( "ERROR_CODE_DATABASE_ERROR", - 1236 );
-define ( "ERROR_MSG_DATABASE_ERROR", "Database error" );
-define ( "ERROR_CODE_UNAUTHORIZED_ACCESS", - 1237 );
-define ( "ERROR_MSG_UNAUTHORIZED_ACCESS", "Unauthorized access" );
-define ( "ERROR_CODE_DUPLICATE", - 1238 );
-define ( "ERROR_MSG_DUPLICATE", "Already exists" );
-define ( "ERROR_CODE_ROOM_NOT_CHANGED_ERROR", -1239 );
-define ( "ERROR_MSG_ROOM_NOT_CHANGED_ERROR", "Room not changed" );
-define ( "ERROR_CODE_REDIRECT_FAILED", -1240) ;
-define ( "ERROR_MSG_REDIRECT_FAILED", "Redirect failed" );
+define ( ERROR_CODE_BAD_LOGIN_OR_PASSWORD, - 1234 );
+define ( ERROR_MSG_BAD_LOGIN_OR_PASSWORD, "Bad username or password" );
+define ( ERROR_CODE_INVALID_TOKEN, - 1235 );
+define ( ERROR_MSG_INVALID_TOKEN, "Invalid token" );
+define ( ERROR_CODE_DATABASE_ERROR, - 1236 );
+define ( ERROR_MSG_DATABASE_ERROR, "Database error" );
+define ( ERROR_CODE_UNAUTHORIZED_ACCESS, - 1237 );
+define ( ERROR_MSG_UNAUTHORIZED_ACCESS, "Unauthorized access" );
+define ( ERROR_CODE_DUPLICATE, - 1238 );
+define ( ERROR_MSG_DUPLICATE, "Already exists" );
+define ( ERROR_CODE_ROOM_NOT_CHANGED_ERROR, -1239 );
+define ( ERROR_MSG_ROOM_NOT_CHANGED_ERROR, "Room not changed" );
+define ( ERROR_CODE_REDIRECT_FAILED, -1240) ;
+define ( ERROR_MSG_REDIRECT_FAILED, "Redirect failed" );
 
-
-/* $ACCEPTED_SSIDs = array("anton", "bashawell", "dlink", 
-		"fonseka", "gbvideo", "herkel", 
-		"megs", "mike_sk", "nikolka", "s11",
-		"tomiwifi", "upc1799993"); */
-// Home
-/* $ACCEPTED_BSSIDs = array("00:4f:62:26:ed:f5", "00:16:b6:d9:06:66", "c4:27:95:77:eb:03", 
-		"34:08:04:d4:4a:ac", "00:1c:f0:89:0e:b0", "00:22:b0:a6:5f:40", 
-		"00:22:75:24:03:64", "00:24:01:93:49:56", "bc:f6:85:c9:95:44", "90:94:e4:3a:c4:02",
-		"00:26:5a:af:bf:de", "28:10:7b:ed:4b:14"); */
 
 // !!! KEEP SYNCED WITH DATABASE COLUMN NAMES AT ALL TIMES !!!
 // IF THIS CHANGES (or a typo was made) YOU NEED TO RECREATE THE
 // WHOLE DATABASE, AS IT NEEDS TO BE DROPPED
 $ACCEPTED_BSSIDs = array(
-	// TUNET
-	"00:26:cb:a0:93:f1",
-	"00:26:cb:4d:78:ae",
 	"00:26:cb:4d:78:a1",
-	"00:26:cb:4e:19:fe",
-	"00:26:cb:4e:19:f1",
-	"00:26:cb:a0:93:fe",
+	"00:26:cb:4d:78:ae",
 	"00:26:cb:4e:18:d1",
-	"00:26:cb:a0:a1:b1",
-	"00:26:cb:a0:a1:be",
-	"58:bc:27:5c:ba:9e",
 	"00:26:cb:4e:19:11",
 	"00:26:cb:4e:19:1e",
+	"00:26:cb:4e:19:f1",
+	"00:26:cb:4e:19:fe",
 	"00:26:cb:4e:1b:01",
+	"00:26:cb:4e:38:b1",
+	"00:26:cb:4e:38:be",
+	"00:26:cb:9f:96:01",
+	"00:26:cb:9f:96:0e",
+	"00:26:cb:9f:ac:91",
+	"00:26:cb:a0:8f:c1",
+	"00:26:cb:a0:93:f1",
+	"00:26:cb:a0:93:fe",
+	"00:26:cb:a0:a1:b1",
+	"00:26:cb:a0:a1:be",
+	"00:26:cb:a0:a8:51",
+	"00:26:cb:a0:e5:51",
+	"00:26:cb:a0:e6:01",
+	"00:26:cb:a0:e6:0e",
 	"58:bc:27:5c:ba:91",
-
-	// EDUROAM
-	"00:26:cb:4d:78:a2",
-	"00:26:cb:4d:78:ad",
-	"00:26:cb:4e:19:fd",
-	"00:26:cb:4e:19:f2",
-	"00:26:cb:a0:93:f2",
-	"00:26:cb:a0:93:fd",
-	"00:26:cb:4e:18:d2",
-	"00:26:cb:a0:a1:bd",
-	"00:26:cb:a0:a1:b2",
-	"00:26:cb:4e:19:12",
-	"00:26:cb:4e:19:1d",
-	"58:bc:27:5c:ba:9d",
-	"00:26:cb:9f:ac:92",
-	"58:bc:27:5c:ba:92");
+	"58:bc:27:5c:ba:9e");
 // !!!
 
 
@@ -176,6 +162,15 @@ $app->post ( "/localize", function () use($app) {
 $app->post ( "/force_localize", function () use($app) {
 	forceLocalize();
 });
+
+/**
+* CHANGE COEFICIENT SETTINGS
+* {"token":"abc123", "coef_setting":99}
+*/
+$app->post ( "/change_coef_settings", function () use($app) {
+	changeCoeficientSettings();
+});
+
 
 /**
  * GET ALL USERS
