@@ -23,15 +23,12 @@ function getAllRooms() {
 
 	$statement = $pdo->prepare ( $sql );
 	$statement->bindParam ( "user_id", $userId );
-	$statement->execute ();
+	if(!$statement->execute ()) {
+		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
+		return;
+	}
 	
 	$rooms = $statement->fetchAll ( PDO::FETCH_OBJ );
-	
-	//
-	if ($statement->rowCount () <= 0) {
-		echo error ( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR );
-	} else {
-		echo success ( $rooms );
-	}
+	echo success ($rooms);
 }
  ?>

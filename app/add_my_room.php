@@ -45,7 +45,7 @@ function addMyRoom() {
 	}
 
 	// Odpovedat s prave vlozenym roomom
-	$sql3 = "SELECT id, name, floor, created_at, changed_at FROM redirecto_room WHERE id = :id;";
+	$sql3 = "SELECT id, name, floor, phone_number, created_at, changed_at FROM redirecto_room WHERE id = :id;";
 	
 	$statement3 = $pdo->prepare ( $sql3 );
 	$statement3->bindParam ( "id", $roomId );

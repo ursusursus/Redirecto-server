@@ -1,4 +1,5 @@
 <?php
+
 require "Slim/Slim.php";
 require "app/login.php";
 require "app/logout.php";
@@ -22,7 +23,6 @@ $app = new \Slim\Slim ();
 
 
 
-
 /******************************
 ********** CONSTANTS **********
 *******************************/
@@ -33,21 +33,21 @@ define ( MINIMAL_ACC_COEFICIENT, 30);
 define ( DEFAULT_ACC_COEFICIENT, 50);
 
 define ( ERROR_CODE_BAD_LOGIN_OR_PASSWORD, - 1234 );
-define ( ERROR_MSG_BAD_LOGIN_OR_PASSWORD, "Bad username or password" );
+define ( ERROR_MSG_BAD_LOGIN_OR_PASSWORD, "Nesprávne meno alebo heslo" );
 define ( ERROR_CODE_INVALID_TOKEN, - 1235 );
-define ( ERROR_MSG_INVALID_TOKEN, "Invalid token" );
+define ( ERROR_MSG_INVALID_TOKEN, "Neplatný token" );
 define ( ERROR_CODE_DATABASE_ERROR, - 1236 );
-define ( ERROR_MSG_DATABASE_ERROR, "Database error" );
+define ( ERROR_MSG_DATABASE_ERROR, "Databázová chyba" );
 define ( ERROR_CODE_UNAUTHORIZED_ACCESS, - 1237 );
-define ( ERROR_MSG_UNAUTHORIZED_ACCESS, "Unauthorized access" );
+define ( ERROR_MSG_UNAUTHORIZED_ACCESS, "Nepovolený prístup" );
 define ( ERROR_CODE_DUPLICATE, - 1238 );
-define ( ERROR_MSG_DUPLICATE, "Already exists" );
+define ( ERROR_MSG_DUPLICATE, "Už existuje" );
 define ( ERROR_CODE_ROOM_NOT_CHANGED_ERROR, -1239 );
-define ( ERROR_MSG_ROOM_NOT_CHANGED_ERROR, "Room not changed" );
+define ( ERROR_MSG_ROOM_NOT_CHANGED_ERROR, "Miestnosť sa nezmenila" );
 define ( ERROR_CODE_REDIRECT_FAILED, -1240) ;
-define ( ERROR_MSG_REDIRECT_FAILED, "Redirect failed" );
+define ( ERROR_MSG_REDIRECT_FAILED, "Presmerovanie zlyhalo" );
 define ( ERROR_CODE_COEFICIENT_TOO_LARGE, -1241 );
-define ( ERROR_MSG_COEFICIENT_TOO_LARGE, "Coeficient too large. Not forwarding" );
+define ( ERROR_MSG_COEFICIENT_TOO_LARGE, "Koeficient je príliš veľký. Nepresmerujem" );
 
 
 // !!! KEEP SYNCED WITH DATABASE COLUMN NAMES AT ALL TIMES !!!

@@ -71,7 +71,6 @@ function localize() {
 	$statement3->bindParam ( "user_id", $userId);
 	$statement3->execute ();
 	$coefs = $statement3->fetchAll ( \PDO::FETCH_OBJ );
-	// var_dump($coefs[0]);
 	
 	$calculatedRoomId = $rows[0]->room_id;
 	$calculatedCoeficient = $rows[0]->coeficient;
@@ -84,24 +83,36 @@ function localize() {
 		return;
 	}
 
-	// if($calculatedRoomId != $lastRoomId) {
-		// Its a change!
+	// If room changed
+	if($calculatedRoomId != $lastRoomId) {
 
+		// Go redirect VoIP calls
 		$redirectSuccess = redirectVoipCalls($userId, $calculatedRoomId);
 		if(!$redirectSuccess) {
 			echo error ( ERROR_CODE_REDIRECT_FAILED, ERROR_MSG_REDIRECT_FAILED );
-
-		} else {
-			echo success(
-				array(
-					"calculated_room_id" => $calculatedRoomId
-					)
-				);
+			return;
 		}
 
-	/* } else {
-		echo error ( ERROR_CODE_ROOM_NOT_CHANGED_ERROR, ERROR_MSG_ROOM_NOT_CHANGED_ERROR );
-	} */
+	}
+
+	// Query room details
+	$sqlRoom = "SELECT id, name, floor FROM redirecto_room WHERE id=:id";
+	$statement4 = $pdo->prepare($sqlRoom);
+	$statement4->bindParam("id", $calculatedRoomId);
+	if(!$statement4->execute()) {
+		echo error( ERROR_CODE_DATABASE_ERROR, ERROR_MSG_DATABASE_ERROR);
+		return;
+	}
+
+	$rooms = $statement4->fetchAll(\PDO::FETCH_OBJ);
+	echo success(
+		array(
+			"calculated_room_id" => $rooms[0]->id,
+			"calculated_room_name" => $rooms[0]->name,
+			"calculated_room_desc" => $rooms[0]->floor
+			)
+		);
+		
 
 }
  ?>
