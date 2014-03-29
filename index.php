@@ -26,6 +26,8 @@ $app = new \Slim\Slim ();
 /******************************
 ********** CONSTANTS **********
 *******************************/
+define ( ROLE_ADMIN, "admin" );
+define ( ROLE_REGULAR, "regular" );
 define ( MAX_RSSI, -110 );
 define ( VOIP_REDIRECT_URL, "http://ns.cnl.sk/forward.php");
 define ( SHARED_SECRET, "VoIPr3d1r3ct0r");
@@ -273,7 +275,7 @@ function isAdmin($pdo, $userId) {
 		return false;
 	}
 	
-	$sql = "SELECT id FROM redirecto_user WHERE id = :id AND role = 'admin';";
+	$sql = "SELECT id FROM redirecto_user WHERE id = :id AND role = '" . ROLE_ADMIN . "';";
 	
 	//
 	$statement = $pdo->prepare ( $sql );

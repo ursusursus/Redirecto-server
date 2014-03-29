@@ -10,25 +10,14 @@ function login() {
 	// $token = sha1 ( uniqid () );
 	$hashedPassword = sha1 ( $password );
 	
-	// SELECT id, email, directory_number FROM redirecto_user WHERE email = email AND password = password;
-	// if rowCount <= 0
-	// 	die()
-	// else
-	// 	generate token
-	// 	update token
-	//  echo token, email, directory_number
 
 	$pdo = getDatabase ();
-	// $sql = "UPDATE redirecto_user SET token = :token WHERE email = :email AND password = :password;";
+
 	$sql = "SELECT id, email, directory_number FROM redirecto_user WHERE email = :email AND password = :password;";
-	
-	//
 	$statement = $pdo->prepare ( $sql );
 	$statement->bindParam ( "email", $email );
 	$statement->bindParam ( "password", $hashedPassword );
 	$statement->execute ();
-
-	//
 	$rows = $statement->fetchAll ( \PDO::FETCH_OBJ );
 	
 	//
@@ -38,6 +27,7 @@ function login() {
 	} else {
 		// Generate token
 		$token = sha1 ( uniqid () );
+		$isAdmin = isAdmin($pdo, $rows[0]->id);
 
 		// Update token in database
 		$sql2 = "UPDATE redirecto_user SET token = :token WHERE id = :id;";
@@ -50,6 +40,7 @@ function login() {
 		$responseArray = array ();
 		$responseArray ["token"] = $token;
 		$responseArray ["email"] = $rows[0]->email;
+		$responseArray ["is_admin"] = $isAdmin;
 		$responseArray ["directory_number"] = $rows[0]->directory_number;
 		echo success ( $responseArray );
 	}
